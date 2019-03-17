@@ -1,10 +1,22 @@
-import React, { Fragment, useEffect, useReducer, useMemo } from 'react'
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo
+} from 'react'
 import todoApi from '../apis/todos'
 import List from './List'
-import { useFormInput } from '../hooks/forms'
 
-const Todo = () => {
-  const todoInput = useFormInput()
+const Todo = props => {
+  // const [todo, setTodo] = useState('')
+  // const [submittedTodo, setSubmittedTodo] = useState(null)
+  // const [todos, setTodos] = useState([])
+
+  const [inputIsValid, setInputIsValid] = useState(false)
+
+  const todoInputRef = useRef()
 
   const todoListReducer = (state, action) => {
     switch (action.mode) {
@@ -37,8 +49,14 @@ const Todo = () => {
     }
   }, [])
 
+  /* useEffect(() => {
+    if (submittedTodo) {
+      dispatch({ mode: 'ADD', payload: submittedTodo })
+    }
+  }, [submittedTodo]) */
+
   const todoAddHandler = () => {
-    const todoName = todoInput.value
+    const todoName = todoInputRef.current.value
 
     todoApi
       .post('/todos.json', {
@@ -47,6 +65,7 @@ const Todo = () => {
       .then(res => {
         setTimeout(() => {
           const todoItem = { id: res.data.name, name: todoName }
+          // setSubmittedTodo(todoItem)
           dispatch({ mode: 'ADD', payload: todoItem })
         }, 1000)
       })
@@ -62,16 +81,22 @@ const Todo = () => {
       .catch(err => console.log(err))
   }
 
+  const inputValidationHandler = event => {
+    if (event.target.value.trim() === '') {
+      setInputIsValid(false)
+    } else {
+      setInputIsValid(true)
+    }
+  }
+
   return (
     <Fragment>
       <input
         type="text"
         placeholder="Todo"
-        onChange={todoInput.onChange}
-        value={todoInput.value}
-        style={{
-          backgroundColor: todoInput.validity === true ? 'transparent' : 'red'
-        }}
+        ref={todoInputRef}
+        onChange={inputValidationHandler}
+        style={{ backgroundColor: inputIsValid ? 'transparent' : 'red' }}
       />
       <button type="button" onClick={todoAddHandler}>
         Add
