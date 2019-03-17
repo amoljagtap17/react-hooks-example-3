@@ -1,10 +1,26 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, useReducer } from 'react'
 import todoApi from '../apis/todos'
 
 const Todo = props => {
   const [todo, setTodo] = useState('')
   const [submittedTodo, setSubmittedTodo] = useState(null)
-  const [todos, setTodos] = useState([])
+  // const [todos, setTodos] = useState([])
+
+  const todoListReducer = (state, action) => {
+    switch (action.mode) {
+      case 'ADD':
+        return state.concat(action.payload)
+      case 'SET':
+        return action.payload
+      case 'REMOVE':
+        return state.filter(todo => todo.id !== action.payload)
+      default:
+        return state
+    }
+  }
+
+  // const [state, dispatch] = useReducer(todoListReducer, [])
+  const [todoList, dispatch] = useReducer(todoListReducer, [])
 
   const inputChangeHandler = event => {
     setTodo(event.target.value)
@@ -17,7 +33,7 @@ const Todo = props => {
       for (const key in todoData) {
         todos.push({ id: key, name: todoData[key].name })
       }
-      setTodos(todos)
+      dispatch({ mode: 'SET', payload: todos })
     })
 
     return () => {
@@ -27,7 +43,7 @@ const Todo = props => {
 
   useEffect(() => {
     if (submittedTodo) {
-      setTodos(todos.concat(submittedTodo))
+      dispatch({ mode: 'ADD', payload: submittedTodo })
     }
   }, [submittedTodo])
 
@@ -40,7 +56,7 @@ const Todo = props => {
         setTimeout(() => {
           const todoItem = { id: res.data.name, name: todo }
           setSubmittedTodo(todoItem)
-        }, 3000)
+        }, 1000)
       })
       .catch(err => console.log(err))
   }
@@ -57,7 +73,7 @@ const Todo = props => {
         Add
       </button>
       <ul>
-        {todos.map(todo => (
+        {todoList.map(todo => (
           <li key={todo.id}>{todo.name}</li>
         ))}
       </ul>
