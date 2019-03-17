@@ -3,6 +3,7 @@ import todoApi from '../apis/todos'
 
 const Todo = props => {
   const [todo, setTodo] = useState('')
+  const [submittedTodo, setSubmittedTodo] = useState(null)
   const [todos, setTodos] = useState([])
 
   const inputChangeHandler = event => {
@@ -24,14 +25,23 @@ const Todo = props => {
     }
   }, [])
 
-  const todoAddHandler = () => {
-    setTodos(todos.concat(todo))
+  useEffect(() => {
+    if (submittedTodo) {
+      setTodos(todos.concat(submittedTodo))
+    }
+  }, [submittedTodo])
 
+  const todoAddHandler = () => {
     todoApi
       .post('/todos.json', {
         name: todo
       })
-      .then(res => console.log(res))
+      .then(res => {
+        setTimeout(() => {
+          const todoItem = { id: res.data.name, name: todo }
+          setSubmittedTodo(todoItem)
+        }, 3000)
+      })
       .catch(err => console.log(err))
   }
 
