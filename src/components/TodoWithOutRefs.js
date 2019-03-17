@@ -1,12 +1,10 @@
-import React, { Fragment, useEffect, useReducer, useRef } from 'react'
+import React, { Fragment, useState, useEffect, useReducer } from 'react'
 import todoApi from '../apis/todos'
 
 const Todo = props => {
-  // const [todo, setTodo] = useState('')
+  const [todo, setTodo] = useState('')
   // const [submittedTodo, setSubmittedTodo] = useState(null)
   // const [todos, setTodos] = useState([])
-
-  const todoInputRef = useRef()
 
   const todoListReducer = (state, action) => {
     switch (action.mode) {
@@ -23,6 +21,10 @@ const Todo = props => {
 
   // const [state, dispatch] = useReducer(todoListReducer, [])
   const [todoList, dispatch] = useReducer(todoListReducer, [])
+
+  const inputChangeHandler = event => {
+    setTodo(event.target.value)
+  }
 
   useEffect(() => {
     todoApi.get('/todos.json').then(res => {
@@ -46,15 +48,13 @@ const Todo = props => {
   }, [submittedTodo]) */
 
   const todoAddHandler = () => {
-    const todoName = todoInputRef.current.value
-
     todoApi
       .post('/todos.json', {
-        name: todoName
+        name: todo
       })
       .then(res => {
         setTimeout(() => {
-          const todoItem = { id: res.data.name, name: todoName }
+          const todoItem = { id: res.data.name, name: todo }
           // setSubmittedTodo(todoItem)
           dispatch({ mode: 'ADD', payload: todoItem })
         }, 3000)
@@ -73,7 +73,12 @@ const Todo = props => {
 
   return (
     <Fragment>
-      <input type="text" placeholder="Todo" ref={todoInputRef} />
+      <input
+        type="text"
+        placeholder="Todo"
+        onChange={inputChangeHandler}
+        value={todo}
+      />
       <button type="button" onClick={todoAddHandler}>
         Add
       </button>
