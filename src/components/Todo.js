@@ -3,7 +3,7 @@ import todoApi from '../apis/todos'
 
 const Todo = props => {
   const [todo, setTodo] = useState('')
-  const [submittedTodo, setSubmittedTodo] = useState(null)
+  // const [submittedTodo, setSubmittedTodo] = useState(null)
   // const [todos, setTodos] = useState([])
 
   const todoListReducer = (state, action) => {
@@ -41,11 +41,11 @@ const Todo = props => {
     }
   }, [])
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (submittedTodo) {
       dispatch({ mode: 'ADD', payload: submittedTodo })
     }
-  }, [submittedTodo])
+  }, [submittedTodo]) */
 
   const todoAddHandler = () => {
     todoApi
@@ -55,8 +55,18 @@ const Todo = props => {
       .then(res => {
         setTimeout(() => {
           const todoItem = { id: res.data.name, name: todo }
-          setSubmittedTodo(todoItem)
-        }, 1000)
+          // setSubmittedTodo(todoItem)
+          dispatch({ mode: 'ADD', payload: todoItem })
+        }, 3000)
+      })
+      .catch(err => console.log(err))
+  }
+
+  const todoRemove = todoId => {
+    todoApi
+      .delete(`/todos/${todoId}.json`)
+      .then(() => {
+        dispatch({ mode: 'REMOVE', payload: todoId })
       })
       .catch(err => console.log(err))
   }
@@ -74,7 +84,9 @@ const Todo = props => {
       </button>
       <ul>
         {todoList.map(todo => (
-          <li key={todo.id}>{todo.name}</li>
+          <li key={todo.id} onClick={todoRemove.bind(this, todo.id)}>
+            {todo.name}
+          </li>
         ))}
       </ul>
     </Fragment>
