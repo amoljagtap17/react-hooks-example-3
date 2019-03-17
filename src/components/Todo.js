@@ -1,17 +1,38 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
+import todoApi from '../apis/todos'
 
 const Todo = props => {
-  const [todoState, setTodoState] = useState({ todo: '', todos: [] })
+  const [todo, setTodo] = useState('')
+  const [todos, setTodos] = useState([])
 
   const inputChangeHandler = event => {
-    setTodoState({ todo: event.target.value, todos: todoState.todos })
+    setTodo(event.target.value)
   }
 
-  const todoAddHandler = () => {
-    setTodoState({
-      todo: todoState.todo,
-      todos: todoState.todos.concat(todoState.todo)
+  useEffect(() => {
+    todoApi.get('/todos.json').then(res => {
+      const todoData = res.data
+      const todos = []
+      for (const key in todoData) {
+        todos.push({ id: key, name: todoData[key].name })
+      }
+      setTodos(todos)
     })
+
+    return () => {
+      console.log('clean up')
+    }
+  }, [])
+
+  const todoAddHandler = () => {
+    setTodos(todos.concat(todo))
+
+    todoApi
+      .post('/todos.json', {
+        name: todo
+      })
+      .then(res => console.log(res))
+      .catch(err => console.log(err))
   }
 
   return (
@@ -20,15 +41,15 @@ const Todo = props => {
         type="text"
         placeholder="Todo"
         onChange={inputChangeHandler}
-        value={todoState.todo}
+        value={todo}
       />
       <button type="button" onClick={todoAddHandler}>
         Add
       </button>
       <ul>
-        {todoState.todos.map((todo, index) => {
-          return <li key={index}>{todo}</li>
-        })}
+        {todos.map(todo => (
+          <li key={todo.id}>{todo.name}</li>
+        ))}
       </ul>
     </Fragment>
   )

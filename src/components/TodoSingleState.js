@@ -1,15 +1,17 @@
 import React, { Fragment, useState } from 'react'
 
 const Todo = props => {
-  const [todo, setTodo] = useState('')
-  const [todos, setTodos] = useState([])
+  const [todoState, setTodoState] = useState({ todo: '', todos: [] })
 
   const inputChangeHandler = event => {
-    setTodo(event.target.value)
+    setTodoState({ todo: event.target.value, todos: todoState.todos })
   }
 
   const todoAddHandler = () => {
-    setTodos(todos.concat(todo))
+    setTodoState({
+      todo: todoState.todo,
+      todos: todoState.todos.concat(todoState.todo)
+    })
   }
 
   return (
@@ -18,13 +20,13 @@ const Todo = props => {
         type="text"
         placeholder="Todo"
         onChange={inputChangeHandler}
-        value={todo}
+        value={todoState.todo}
       />
       <button type="button" onClick={todoAddHandler}>
         Add
       </button>
       <ul>
-        {todos.map((todo, index) => {
+        {todoState.todos.map((todo, index) => {
           return <li key={index}>{todo}</li>
         })}
       </ul>
