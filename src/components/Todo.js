@@ -1,10 +1,20 @@
-import React, { Fragment, useEffect, useReducer, useRef } from 'react'
+import React, {
+  Fragment,
+  useState,
+  useEffect,
+  useReducer,
+  useRef,
+  useMemo
+} from 'react'
 import todoApi from '../apis/todos'
+import List from './List'
 
 const Todo = props => {
   // const [todo, setTodo] = useState('')
   // const [submittedTodo, setSubmittedTodo] = useState(null)
   // const [todos, setTodos] = useState([])
+
+  const [inputIsValid, setInputIsValid] = useState(false)
 
   const todoInputRef = useRef()
 
@@ -57,12 +67,12 @@ const Todo = props => {
           const todoItem = { id: res.data.name, name: todoName }
           // setSubmittedTodo(todoItem)
           dispatch({ mode: 'ADD', payload: todoItem })
-        }, 3000)
+        }, 1000)
       })
       .catch(err => console.log(err))
   }
 
-  const todoRemove = todoId => {
+  const todoRemoveHandler = todoId => {
     todoApi
       .delete(`/todos/${todoId}.json`)
       .then(() => {
@@ -71,19 +81,32 @@ const Todo = props => {
       .catch(err => console.log(err))
   }
 
+  const inputValidationHandler = event => {
+    if (event.target.value.trim() === '') {
+      setInputIsValid(false)
+    } else {
+      setInputIsValid(true)
+    }
+  }
+
   return (
     <Fragment>
-      <input type="text" placeholder="Todo" ref={todoInputRef} />
+      <input
+        type="text"
+        placeholder="Todo"
+        ref={todoInputRef}
+        onChange={inputValidationHandler}
+        style={{ backgroundColor: inputIsValid ? 'transparent' : 'red' }}
+      />
       <button type="button" onClick={todoAddHandler}>
         Add
       </button>
-      <ul>
-        {todoList.map(todo => (
-          <li key={todo.id} onClick={todoRemove.bind(this, todo.id)}>
-            {todo.name}
-          </li>
-        ))}
-      </ul>
+      {useMemo(
+        () => (
+          <List items={todoList} onClick={todoRemoveHandler} />
+        ),
+        [todoList]
+      )}
     </Fragment>
   )
 }
